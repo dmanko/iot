@@ -24,6 +24,8 @@ import javax.ws.rs.core.SecurityContext;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import by.iba.hackaton.twin.model.Node;
 
@@ -45,7 +47,7 @@ public class TwinService {
 
 	@SuppressWarnings("unchecked")
 	@GET
-	@Path("/geojson/all")
+	@Path("/nodes/all")
 	public List<Node> getNodes(@Context SecurityContext ctx) {
 		List<Node> retVal = null;
 
@@ -55,36 +57,8 @@ public class TwinService {
 		return retVal;
 	}
 	
-	
-	@SuppressWarnings("unchecked")
 	@GET
-	@Path("/geojson/original")
-	public String getOriginalGeoJSON(@Context SecurityContext ctx) {
-		String retVal = null;
-
-		EntityManager em = this.getEntityManager(ctx);
-		List<Node> nodes = em.createNamedQuery("Node.findAll").getResultList();
-		
-		JSONArray jsonArray = new JSONArray();
-		String json = null;
-		
-		Iterator<Node> nodeIterator = nodes.iterator();
-		
-		while (nodeIterator.hasNext()) {
-			json = nodeIterator.next().getOriginalJSON();
-			if (json != null) {
-				jsonArray.add(json);
-			}
-			
-		}
-		
-		retVal = jsonArray.toJSONString();
-
-		return retVal;
-	}
-	
-	@GET
-	@Path("/geojson/{id}")
+	@Path("/nodes/{id}")
 	public Node getNodeById(@PathParam(value = "id") String id, @Context SecurityContext ctx) {
 		Node retVal = null;
 
@@ -103,6 +77,71 @@ public class TwinService {
 
 		return retVal;
 	}
+	
+	
+	
+	@SuppressWarnings("unchecked")
+	@GET
+	@Path("/geojson/original")
+	public String getOriginalGeoJSON(@Context SecurityContext ctx) throws ParseException {
+		String retVal = null;
+
+		EntityManager em = this.getEntityManager(ctx);
+		List<Node> nodes = em.createNamedQuery("Node.findAll").getResultList();
+		
+		JSONArray jsonArray = new JSONArray();
+		JSONObject json = null;
+		JSONParser parser = new JSONParser(); 
+		String jsonS = null;
+		
+		Iterator<Node> nodeIterator = nodes.iterator();
+		
+		while (nodeIterator.hasNext()) {
+			jsonS= nodeIterator.next().getOriginalJSON();
+			
+			if (jsonS != null) {
+				json = (JSONObject) parser.parse(jsonS);
+				jsonArray.add(json);
+			}
+			
+		}
+		
+		retVal = jsonArray.toJSONString();
+
+		return retVal;
+	}
+	
+	@GET
+	@Path("/geojson/{id}")
+	public String getGeoJSONByNodeId(@PathParam(value = "id") String id, @Context SecurityContext ctx) {
+		String retVal = null;
+
+		EntityManager em = this.getEntityManager(ctx);
+
+		try {
+			Query query = em.createNamedQuery("NodeById");
+			query.setParameter("id", id);
+			Node node = (Node) query.getSingleResult();
+			
+			String jsonS = node.getOriginalJSON();
+			
+//			JSONParser parser = new JSONParser();
+//			JSONObject json = null;
+//			if (jsonS != null) {
+//				json = (JSONObject)parser.parse(jsonS);
+//			}
+			
+			retVal = jsonS;
+			
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		} finally {
+			em.close();
+		}
+
+		return retVal;
+	}
+	
 	
 	
 	
