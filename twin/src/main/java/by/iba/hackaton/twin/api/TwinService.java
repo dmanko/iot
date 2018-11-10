@@ -1,6 +1,5 @@
 package by.iba.hackaton.twin.api;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -86,8 +85,7 @@ public class TwinService {
 	public String getOriginalGeoJSON(@Context SecurityContext ctx) throws ParseException {
 		String retVal = null;
 
-		EntityManager em = this.getEntityManager(ctx);
-		List<Node> nodes = em.createNamedQuery("Node.findAll").getResultList();
+		List<Node> nodes = this.getNodes(ctx);
 		
 		JSONArray jsonArray = new JSONArray();
 		JSONObject json = null;
@@ -115,30 +113,17 @@ public class TwinService {
 	@Path("/geojson/{id}")
 	public String getGeoJSONByNodeId(@PathParam(value = "id") String id, @Context SecurityContext ctx) {
 		String retVal = null;
-
-		EntityManager em = this.getEntityManager(ctx);
-
-		try {
-			Query query = em.createNamedQuery("NodeById");
-			query.setParameter("id", id);
-			Node node = (Node) query.getSingleResult();
-			
-			String jsonS = node.getOriginalJSON();
-			
+		
+		Node node = this.getNodeById(id, ctx);
+		retVal = node.getOriginalJSON();
+		
+//		String jsonS = node.getOriginalJSON();
+//		JSONObject json = null;
+//		if (jsonS != null) {
 //			JSONParser parser = new JSONParser();
-//			JSONObject json = null;
-//			if (jsonS != null) {
-//				json = (JSONObject)parser.parse(jsonS);
-//			}
-			
-			retVal = jsonS;
-			
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		} finally {
-			em.close();
-		}
-
+//			json = (JSONObject)parser.parse(jsonS);
+//		}
+		
 		return retVal;
 	}
 	
