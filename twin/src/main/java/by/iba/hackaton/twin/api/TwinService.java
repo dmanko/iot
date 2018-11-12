@@ -78,7 +78,7 @@ public class TwinService {
 	}
 	
 	@GET
-	@Path("/nodes/{type}")
+	@Path("/nodes/type={type}")
 	public List<Node> getNodesByType(@PathParam(value = "type") String type, @Context SecurityContext ctx) {
 		List<Node> retVal = null;
 
