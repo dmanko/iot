@@ -11,7 +11,8 @@ import javax.persistence.*;
 @Entity
 @Table(schema="\"ENTERPRISE_TWIN\"", name="\"nodes\"")
 @NamedQueries({ @NamedQuery(name="Node.findAll", query="SELECT n FROM Node n"),
-				@NamedQuery(name = "NodeById", query = "SELECT n FROM Node n WHERE n.nodeID LIKE :id"),
+				@NamedQuery(name = "NodeById", query = "SELECT n FROM Node n WHERE n.nodeID = :id"),
+				@NamedQuery(name = "NodesByTemplateID", query = "SELECT n FROM Node n WHERE n.nodeID LIKE :id"),
 				@NamedQuery(name = "Node.FindByType", query = "SELECT n FROM Node n WHERE n.nodeType = :type")
 			})
 
