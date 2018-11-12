@@ -20,6 +20,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.SecurityContext;
 
+import org.apache.cxf.rs.security.cors.CrossOriginResourceSharing;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -37,7 +38,18 @@ import by.iba.hackaton.twin.model.Node;
  * @version 0.1
  */
 
-
+@CrossOriginResourceSharing(
+    allowAllOrigins = true, 
+    allowHeaders = {
+            "Accept", "Accept-Charset", "Accept-Encoding", "Accept-Datetime", 
+            "Accept-Language", "Authorization", "Content-Language", "Content-Length", 
+            "Content-Type", "Origin", "User-Agent"},
+    exposeHeaders = {
+            "Accept", "Accept-Charset", "Accept-Encoding", "Accept-Datetime", 
+            "Accept-Language", "Authorization", "Content-Language", "Content-Length", 
+            "Content-Type", "Origin", "User-Agent"},
+    allowCredentials = true, 
+    maxAge = 1209600 )
 
 @Path("/svc")
 @Produces({ MediaType.APPLICATION_JSON })
