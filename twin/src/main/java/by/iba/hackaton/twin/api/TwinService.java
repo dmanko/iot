@@ -110,31 +110,6 @@ public class TwinService {
 		return retVal;
 	}
 	
-	@GET
-	@Path("/nodes/like={id}")
-	public List<Node> getNodesByTemplate(@PathParam(value = "id") String partialID, @Context SecurityContext ctx) {
-		List<Node> retVal = null;
-
-		EntityManager em = this.getEntityManager(ctx);
-
-		try {
-			Query query = em.createNamedQuery("NodesByTemplateID");
-//			SQL LIKE Wildcards
-//			% - The percent sign represents zero, one, or multiple characters
-//			_ - The underscore represents a single character
-			query.setParameter("id", partialID + "%");
-			retVal = query.getResultList();
-			
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		} finally {
-			em.close();
-		}
-
-		return retVal;
-	}
-	
-	
 	
 	
 	@SuppressWarnings("unchecked")
