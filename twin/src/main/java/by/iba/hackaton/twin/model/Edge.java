@@ -1,6 +1,8 @@
 package by.iba.hackaton.twin.model;
 
 import java.io.Serializable;
+import java.math.BigInteger;
+
 import javax.persistence.*;
 
 
@@ -14,6 +16,18 @@ import javax.persistence.*;
 @NamedQueries({ @NamedQuery(name="Edge.findAll", query="SELECT e FROM Edge e"),
 				@NamedQuery(name = "EdgeById", query = "SELECT e FROM Edge e WHERE e.key = :id")
 			})
+
+
+@NamedStoredProcedureQuery(
+		name = "TwinRoutingSP", 
+		procedureName = "TwinRoutingShortestPath", 
+		parameters = { 
+			@StoredProcedureParameter(mode = ParameterMode.IN, type = String.class, name = "startNodeID"), 
+			@StoredProcedureParameter(mode = ParameterMode.IN, type = String.class, name = "targetNodeID"), 
+			@StoredProcedureParameter(mode = ParameterMode.OUT, type = BigInteger.class, name = "totalSegments"),
+			@StoredProcedureParameter(mode = ParameterMode.OUT, type = String.class, name = "nodeChain")
+		}
+	)
 
 public class Edge implements Serializable {
 	private static final long serialVersionUID = 1L;

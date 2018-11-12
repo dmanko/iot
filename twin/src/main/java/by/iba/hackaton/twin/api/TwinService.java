@@ -77,6 +77,27 @@ public class TwinService {
 		return retVal;
 	}
 	
+	@GET
+	@Path("/nodes/{type}")
+	public List<Node> getNodesByType(@PathParam(value = "type") String type, @Context SecurityContext ctx) {
+		List<Node> retVal = null;
+
+		EntityManager em = this.getEntityManager(ctx);
+
+		try {
+			Query query = em.createNamedQuery("Node.FindByType");
+			query.setParameter("type", type);
+			retVal = query.getResultList();
+			
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		} finally {
+			em.close();
+		}
+
+		return retVal;
+	}
+	
 	
 	
 	@SuppressWarnings("unchecked")
