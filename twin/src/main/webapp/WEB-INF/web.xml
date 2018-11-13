@@ -8,7 +8,14 @@
 	    <res-ref-name>jdbc/DefaultDB</res-ref-name>
 	    <res-type>javax.sql.DataSource</res-type>
   	</resource-ref>
-
+	<resource-ref>
+	    <res-ref-name>IOT_GATEWAY_REST_MEASURES</res-ref-name>
+	    <res-type>com.sap.core.connectivity.api.http.HttpDestination</res-type>
+	 </resource-ref>
+	 <resource-ref>
+	    <res-ref-name>IOT_GATEWAY_REST_CLIENT</res-ref-name>
+	    <res-type>com.sap.core.connectivity.api.http.HttpDestination</res-type>
+	  </resource-ref>
 	<servlet>
 		<servlet-name>CXFServlet</servlet-name>
 		<servlet-class>
