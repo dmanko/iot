@@ -12,7 +12,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.ParameterMode;
 import javax.persistence.Persistence;
-import javax.persistence.PersistenceUnit;
 import javax.persistence.Query;
 import javax.persistence.StoredProcedureQuery;
 import javax.sql.DataSource;
@@ -24,7 +23,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.SecurityContext;
 
-import org.apache.cxf.rs.security.cors.CrossOriginResourceSharing;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -43,7 +41,7 @@ import by.iba.hackaton.twin.model.Node;
  * @version 0.1
  */
 
-@CrossOriginResourceSharing(
+/*@CrossOriginResourceSharing(
     allowAllOrigins = true, 
     allowHeaders = {
             "Accept", "Accept-Charset", "Accept-Encoding", "Accept-Datetime", 
@@ -55,7 +53,7 @@ import by.iba.hackaton.twin.model.Node;
             "Content-Type", "Origin", "User-Agent"},
     allowCredentials = true, 
     maxAge = 1209600 )
-
+*/
 @Path("/svc")
 @Produces({ MediaType.APPLICATION_JSON })
 public class TwinService {
