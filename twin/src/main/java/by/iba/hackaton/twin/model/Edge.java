@@ -20,12 +20,12 @@ import javax.persistence.*;
 @NamedStoredProcedureQuery(
 		name = "TwinRoutingSP", 
 		procedureName = "TwinRoutingShortestPath", 
-//		resultClasses = {Edge.class},
+		resultClasses = Edge.class,
 		parameters = { 
 			@StoredProcedureParameter(mode = ParameterMode.IN, type = String.class, name = "startNodeID"), 
 			@StoredProcedureParameter(mode = ParameterMode.IN, type = String.class, name = "targetNodeID"), 
 			@StoredProcedureParameter(mode = ParameterMode.OUT, type = BigInteger.class, name = "totalSegments"),
-//			@StoredProcedureParameter(mode = ParameterMode.REF_CURSOR, type = void.class, name = "routing")
+			@StoredProcedureParameter(mode = ParameterMode.REF_CURSOR, type = void.class, name = "routing")
 		}
 	)
 
