@@ -1,7 +1,7 @@
-DROP TYPE "TwinRoutingTT";
-CREATE TYPE "TwinRoutingTT" AS TABLE ("segment" BIGINT, "sourceNodeID" VARCHAR(100), "targetNodeID" VARCHAR(100));
+DROP TYPE "ENTERPRISE_TWIN"."TwinRoutingTT";
+CREATE TYPE "ENTERPRISE_TWIN"."TwinRoutingTT" AS TABLE ("segment" BIGINT, "sourceNodeID" VARCHAR(100), "targetNodeID" VARCHAR(100));
 
-CREATE OR REPLACE PROCEDURE "TwinRoutingShortestPath" (IN startNodeID VARCHAR(100), IN targetNodeID VARCHAR(100), OUT totalSegments BigInt, OUT routing "TwinRoutingTT")
+CREATE OR REPLACE PROCEDURE "ENTERPRISE_TWIN"."TwinRoutingShortestPath" (IN startNodeID VARCHAR(100), IN targetNodeID VARCHAR(100), OUT totalSegments BigInt, OUT routing "TwinRoutingTT")
  LANGUAGE GRAPH READS SQL DATA AS
   BEGIN
 	Graph g = Graph("ENTERPRISE_TWIN", "GRAPH");

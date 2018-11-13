@@ -12,7 +12,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.ParameterMode;
 import javax.persistence.Persistence;
-import javax.persistence.PersistenceUnit;
 import javax.persistence.Query;
 import javax.persistence.StoredProcedureQuery;
 import javax.sql.DataSource;
@@ -43,7 +42,7 @@ import by.iba.hackaton.twin.model.Node;
  * @version 0.1
  */
 
-@CrossOriginResourceSharing(
+/*@CrossOriginResourceSharing(
     allowAllOrigins = true, 
     allowHeaders = {
             "Accept", "Accept-Charset", "Accept-Encoding", "Accept-Datetime", 
@@ -54,7 +53,7 @@ import by.iba.hackaton.twin.model.Node;
             "Accept-Language", "Authorization", "Content-Language", "Content-Length", 
             "Content-Type", "Origin", "User-Agent"},
     allowCredentials = true, 
-    maxAge = 1209600 )
+    maxAge = 1209600 )*/
 
 @Path("/svc")
 @Produces({ MediaType.APPLICATION_JSON })
@@ -200,19 +199,19 @@ public class TwinService {
 		
 
 		try {
-			StoredProcedureQuery storedProcedure = em.createStoredProcedureQuery("TwinRoutingSP").
+			StoredProcedureQuery storedProcedure = em.createStoredProcedureQuery("\"TwinRoutingShortestPath\"").
 					registerStoredProcedureParameter(0 , String.class , ParameterMode.IN).
 					registerStoredProcedureParameter(1 , String.class , ParameterMode.IN).
-					registerStoredProcedureParameter(2 , BigInteger.class , ParameterMode.OUT).
-					registerStoredProcedureParameter(3 , void.class , ParameterMode.REF_CURSOR);
+					registerStoredProcedureParameter(2 , BigInteger.class , ParameterMode.OUT);
 			
 			
 			storedProcedure.setParameter(0, nodeID1)
 				            .setParameter(1, nodeID2)
-				            .setParameter(2, totalRouteSegments)
-				            .setParameter(3, retVal);
+				            .setParameter(2, totalRouteSegments);
 
-			storedProcedure.execute();
+//			storedProcedure.execute();
+			
+			totalRouteSegments = (Integer) storedProcedure.getSingleResult();
 			
 			System.out.println("getRoutingBetween( " + nodeID1 + " and " + nodeID2 + ") :" + totalRouteSegments);
 			
