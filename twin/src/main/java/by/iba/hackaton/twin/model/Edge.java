@@ -17,17 +17,18 @@ import javax.persistence.*;
 				@NamedQuery(name = "EdgeById", query = "SELECT e FROM Edge e WHERE e.key = :id")
 			})
 
-
 @NamedStoredProcedureQuery(
 		name = "TwinRoutingSP", 
 		procedureName = "TwinRoutingShortestPath", 
+		resultClasses = Edge.class,
 		parameters = { 
 			@StoredProcedureParameter(mode = ParameterMode.IN, type = String.class, name = "startNodeID"), 
 			@StoredProcedureParameter(mode = ParameterMode.IN, type = String.class, name = "targetNodeID"), 
 			@StoredProcedureParameter(mode = ParameterMode.OUT, type = BigInteger.class, name = "totalSegments"),
-			@StoredProcedureParameter(mode = ParameterMode.OUT, type = String.class, name = "nodeChain")
+			@StoredProcedureParameter(mode = ParameterMode.REF_CURSOR, type = void.class, name = "routing")
 		}
 	)
+
 
 public class Edge implements Serializable {
 	private static final long serialVersionUID = 1L;

@@ -1,5 +1,6 @@
 package by.iba.hackaton.twin.api;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -9,8 +10,11 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.ParameterMode;
 import javax.persistence.Persistence;
+import javax.persistence.PersistenceUnit;
 import javax.persistence.Query;
+import javax.persistence.StoredProcedureQuery;
 import javax.sql.DataSource;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -27,6 +31,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import by.iba.hackaton.twin.model.Edge;
 import by.iba.hackaton.twin.model.Node;
 
 
@@ -182,6 +187,41 @@ public class TwinService {
 //			json = (JSONObject)parser.parse(jsonS);
 //		}
 		
+		return retVal;
+	}
+	
+	@GET
+	@Path("/nodes/routing/start={id1}&finish={id2}")
+	public List<Edge> getRoutingBetween(@PathParam(value = "id1") String nodeID1, @PathParam(value = "id2") String nodeID2, @Context SecurityContext ctx) {
+		List<Edge> retVal = null;
+		int totalRouteSegments = 0;
+
+		EntityManager em = this.getEntityManager(ctx);
+		
+
+		try {
+			StoredProcedureQuery storedProcedure = em.createStoredProcedureQuery("TwinRoutingSP").
+					registerStoredProcedureParameter(0 , String.class , ParameterMode.IN).
+					registerStoredProcedureParameter(1 , String.class , ParameterMode.IN).
+					registerStoredProcedureParameter(2 , BigInteger.class , ParameterMode.OUT).
+					registerStoredProcedureParameter(3 , void.class , ParameterMode.REF_CURSOR);
+			
+			
+			storedProcedure.setParameter(0, nodeID1)
+				            .setParameter(1, nodeID2)
+				            .setParameter(2, totalRouteSegments)
+				            .setParameter(3, retVal);
+
+			storedProcedure.execute();
+			
+			System.out.println("getRoutingBetween( " + nodeID1 + " and " + nodeID2 + ") :" + totalRouteSegments);
+			
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		} finally {
+			em.close();
+		}
+
 		return retVal;
 	}
 	
