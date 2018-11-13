@@ -17,7 +17,8 @@
 		<init-param>
 			<param-name>jaxrs.serviceClasses</param-name>
 			<param-value>by.iba.hackaton.twin.api.AuthenticationService,
-						 by.iba.hackaton.twin.api.TwinService</param-value>
+						 by.iba.hackaton.twin.api.TwinService,
+						 by.iba.hackaton.twin.api.iot.IoTMeasuresService</param-value>
 		</init-param>
 		<init-param>
 			<param-name>jaxrs.providers</param-name>
