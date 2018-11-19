@@ -9,7 +9,9 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -21,33 +23,30 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 
+import com.sap.core.connectivity.api.DestinationException;
 import com.sap.core.connectivity.api.http.HttpDestination;
 
 @Path("/iot")
 @Produces({ MediaType.APPLICATION_JSON })
-public class IoTMeasuresService 
+public class IoTService 
 {
 	
 	private static final int COPY_CONTENT_BUFFER_SIZE = 1024;
+	
+	HttpClient httpClient = null;
+    HttpDestination destination = null;
 	
 	@GET
 	@Path("/device/{id}")
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response getMeasuresForDevice(@PathParam(value = "id") String deviceId)
 	{
-	    HttpClient httpClient = null;
 	    HttpGet httpGet = null;
-	    
 	    String msgBody = null;
 	    
         try {
-            // Get HTTP destination
-            Context ctx = new InitialContext();
-            HttpDestination destination = (HttpDestination) ctx.lookup("java:comp/env/" +  "IOT_GATEWAY_REST_CLIENT");
-            // Create HTTP client
-            httpClient = destination.createHttpClient();
             
-            final String baseURL = destination.getURI().toString();
+            final String baseURL = getDestination().getURI().toString();
             String destinationURL = null;
             
             if (deviceId != null && deviceId.trim().length() > 0) 
@@ -60,7 +59,7 @@ public class IoTMeasuresService
             // Execute HTTP request
             httpGet = new HttpGet(destinationURL);
  
-            HttpResponse httpResponse = httpClient.execute(httpGet);
+            HttpResponse httpResponse = getHttpClient().execute(httpGet);
             // Check response status code
             int statusCode = httpResponse.getStatusLine().getStatusCode();
             
@@ -139,6 +138,17 @@ public class IoTMeasuresService
     }
 	
 	
+	@POST
+	@Path("/device/create")
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String createDevice(@FormParam(value = "deviceName") String deviceNodeId){
+		
+		
+		
+		return "";
+	}
+	
+	
 	/**
 	 * Extracts the response body from the specified {@link HttpEntity} and returns it as a UTF-8 encoded String.
 	 * 
@@ -188,6 +198,30 @@ public class IoTMeasuresService
 		
 		return retVal;
 	}
+	
+	
+	
+	private HttpClient getHttpClient () throws DestinationException, NamingException {
+		
+		if (this.httpClient == null) {
+			// Get HTTP destination
+	        this.httpClient = getDestination().createHttpClient();
+		}
+		
+		return this.httpClient;
+		
+	}
+	
+	private HttpDestination getDestination() throws NamingException {
+		if (this.destination == null) {
+			Context ctx = new InitialContext();
+			this.destination = (HttpDestination) ctx.lookup("java:comp/env/" +  "IOT_GATEWAY_REST_CLIENT");
+		}
+		
+		return this.destination;
+		
+	}
+	
 }
 	
 
