@@ -4,8 +4,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -218,8 +220,8 @@ public class TwinService {
 	
 	@GET
 	@Path("/nodes/routing/start={id1}&finish={id2}")
-	public List<Edge> getRoutingBetween(@PathParam(value = "id1") String nodeID1, @PathParam(value = "id2") String nodeID2, @Context SecurityContext ctx) {
-		List<Edge> retVal = null;
+	public List<String> getRoutingBetween(@PathParam(value = "id1") String nodeID1, @PathParam(value = "id2") String nodeID2, @Context SecurityContext ctx) {
+		List<String> retVal = new LinkedList<String>();
 		int totalRouteSegments = 0;
 
 		EntityManager em = this.getEntityManager(ctx);
@@ -243,11 +245,14 @@ public class TwinService {
 			Connection connection = getDataSource().getConnection();
 	        try {
 	            PreparedStatement pstmt = connection
-	                    .prepareStatement(" CALL \"ENTERPRISE_TWIN\".\"TwinRoutingShortestPath\"('ROOM-3A-104', 'ROOM-5C-114', ?, ?)");
+	                    .prepareStatement(" CALL \"ENTERPRISE_TWIN\".\"TwinRoutingShortestPath\"('" + nodeID1 + "', '" + nodeID2 + "', ?, ?)");
 	            ResultSet rs = pstmt.executeQuery();
 	    
 	            while (rs.next()) {
 	                totalRouteSegments = rs.getInt(1);
+	                retVal.add(Integer.toString(totalRouteSegments) + ": " + rs.getString(2) + ", " + rs.getString(3));
+	               
+	                
 	            }
 	            
 	            
