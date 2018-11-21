@@ -1,6 +1,9 @@
 package by.iba.hackaton.twin.api;
 
-import java.math.BigInteger;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -10,10 +13,8 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.ParameterMode;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
-import javax.persistence.StoredProcedureQuery;
 import javax.sql.DataSource;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -57,6 +58,33 @@ import by.iba.hackaton.twin.model.Node;
 @Path("/svc")
 @Produces({ MediaType.APPLICATION_JSON })
 public class TwinService {
+	private DataSource dataSource = null;
+
+    /**
+     * Create new data access object with data source.
+     */
+    public TwinService() throws SQLException {
+        setDataSource(getDefaultDataSource());
+    }
+
+    /**
+     * Get data source which is used for the database operations.
+     * @throws SQLException 
+     */
+    public DataSource getDataSource() throws SQLException {
+    	if (this.dataSource == null) {
+    		setDataSource(getDefaultDataSource());
+    	}
+        return dataSource;
+    }
+
+    /**
+     * Set data source to be used for the database operations.
+     */
+    public void setDataSource(DataSource newDataSource) throws SQLException {
+        this.dataSource = newDataSource;
+    }
+	
 
 
 	@SuppressWarnings("unchecked")
@@ -198,7 +226,7 @@ public class TwinService {
 		
 
 		try {
-			StoredProcedureQuery storedProcedure = em.createStoredProcedureQuery("TwinRoutingSP").
+/*			StoredProcedureQuery storedProcedure = em.createStoredProcedureQuery("TwinRoutingSP").
 					registerStoredProcedureParameter(0 , String.class , ParameterMode.IN).
 					registerStoredProcedureParameter(1 , String.class , ParameterMode.IN).
 					registerStoredProcedureParameter(2 , BigInteger.class , ParameterMode.OUT).
@@ -210,7 +238,24 @@ public class TwinService {
 				            .setParameter(2, totalRouteSegments)
 				            .setParameter(3, retVal);
 
-			storedProcedure.execute();
+			storedProcedure.execute();*/
+			
+			Connection connection = getDataSource().getConnection();
+	        try {
+	            PreparedStatement pstmt = connection
+	                    .prepareStatement(" CALL \"ENTERPRISE_TWIN\".\"TwinRoutingShortestPath\"('ROOM-3A-104', 'ROOM-5C-114', ?, ?)");
+	            ResultSet rs = pstmt.executeQuery();
+	    
+	            while (rs.next()) {
+	                totalRouteSegments = rs.getInt(1);
+	            }
+	            
+	            
+	        } finally {
+	            if (connection != null) {
+	                connection.close();
+	            }
+	        }
 			
 			System.out.println("getRoutingBetween( " + nodeID1 + " and " + nodeID2 + ") :" + totalRouteSegments);
 			
@@ -231,7 +276,7 @@ public class TwinService {
 	 * 
 	 * @return <code>DefaultDB</code> {@link DataSource}
 	 */
-	protected DataSource getDataSource() {
+	protected DataSource getDefaultDataSource() {
 		DataSource retVal = null;
 
 		try {
