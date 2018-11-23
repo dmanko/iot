@@ -1,0 +1,59 @@
+{
+	"_version": "1.8.0",
+	"sap.app": {
+		"id": "TwinApp",
+		"type": "application",
+		"i18n": "i18n/i18n.properties",
+		"title": "{{APP_TITLE}}",
+		"description": "{{APP_DESCR}}",
+		"applicationVersion": {
+			"version": "1.0.0"
+		}
+	},
+	"sap.ui": {
+		"technology": "UI5",
+		"deviceTypes": {
+			"desktop": true,
+			"tablet": true,
+			"phone": true
+		}
+	},
+	"sap.ui5": {
+		"rootView": {
+			"viewName": "TwinApp.view.App",
+			"type": "XML"
+		},
+		"models": {
+			"i18n": {
+				"type": "sap.ui.model.resource.ResourceModel",
+				"settings": {
+					"bundleName": "TwinApp.i18n.i18n"
+				}
+			}
+		},
+		"routing": {
+			"config": {
+				"routerClass": "sap.ui.core.routing.Router",
+				"viewType": "XML",
+				"viewPath": "TwinApp.view",
+				"controlId": "appShell",
+				"clearTarget": true
+			},
+			"routes": [
+				{
+					"pattern": "",
+					"name": "routeMain",
+					"target": "targetMain"
+				}
+			],
+			"targets": {
+				"targetMain": {
+					"viewName": "Main",
+					"controlId": "appShell",
+                    "controlAggregation": "content",
+                    "clearAggregation": true
+				}
+			}
+		}
+	}
+}
