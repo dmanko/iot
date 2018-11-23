@@ -1,0 +1,67 @@
+<core:View xmlns:core="sap.ui.core"
+		   xmlns="sap.uxap"
+		   xmlns:layout="sap.ui.layout"
+		   xmlns:m="sap.m"
+		   controllerName="TwinApp.controller.Main"
+		   height="100%">
+
+	<ObjectPageLayout id="ObjectPageLayout" enableLazyLoading="false" useIconTabBar="true" showTitleInHeaderContent="false">
+		<headerTitle>
+			<ObjectPageHeader objectImageURI="sap-icon://employee"
+							  objectTitle="Иванов Иван Иванович"
+							  objectImageShape="Circle"
+							  objectSubtitle="ведущий инженер"
+							  isObjectIconAlwaysVisible="true"
+							  preserveHeaderStateOnScroll="true">
+				<actions>
+					<ObjectPageHeaderActionButton icon="sap-icon://log" text="show state" type="Transparent" tooltip="show"/>
+				</actions>
+			</ObjectPageHeader>
+		</headerTitle>
+
+		<headerContent>
+			<layout:VerticalLayout>
+				<m:Link text="+33 6 4512 5158"/>
+				<m:Link text="ivanoff@sap.com"/>
+			</layout:VerticalLayout>
+		</headerContent>
+
+		<sections>
+			<ObjectPageSection text="DFgdfg">
+				<subSections>
+					<ObjectPageSubSection title="{i18n>TXT_TAB1}">
+						<blocks>
+							<m:IconTabBar
+		id="idIconTabBarMulti"
+		expanded="{device>/isNoPhone}"
+		class="sapUiResponsiveContentPadding">
+		<m:items>
+			<m:IconTabFilter
+				icon="sap-icon://hint">
+				<m:Text text="Info content goes here ..." />
+			</m:IconTabFilter>
+			<m:IconTabFilter
+				icon="sap-icon://attachment"
+				count="3">
+				<m:Text text="Attachments go here ..." />
+			</m:IconTabFilter>
+		</m:items>
+	</m:IconTabBar>
+						</blocks>
+					</ObjectPageSubSection>
+				</subSections>
+			</ObjectPageSection>
+
+			<ObjectPageSection>
+				<subSections>
+					<ObjectPageSubSection title="{i18n>TXT_TAB2}">
+						<blocks>
+							<m:Text text="section 2" />
+						</blocks>
+					</ObjectPageSubSection>
+				</subSections>
+			</ObjectPageSection>
+
+		</sections>
+	</ObjectPageLayout>
+</core:View>

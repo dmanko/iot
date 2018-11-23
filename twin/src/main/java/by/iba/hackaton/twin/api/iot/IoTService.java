@@ -26,6 +26,8 @@ import org.apache.http.client.methods.HttpGet;
 import com.sap.core.connectivity.api.DestinationException;
 import com.sap.core.connectivity.api.http.HttpDestination;
 
+
+
 @Path("/iot")
 @Produces({ MediaType.APPLICATION_JSON })
 public class IoTService 
