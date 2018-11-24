@@ -4,10 +4,12 @@ class Twin3d {
     constructor(oData, el, width, height, center) {
         this.selectedFloor = 0;
         this.selectedRoom = 0;
-        this.selectedBlock = 0;        
-        
+        this.selectedBlock = 0;
+
         this.width = width;
         this.height = height;
+        this.pathLine = {};
+
         console.log('constr');
         //original map
         this.map = new maptalks.Map(el, {
@@ -29,7 +31,7 @@ class Twin3d {
 
         });
         this.center = center;
-        this.obj = $("#"+el);
+        this.obj = $("#" + el);
         this.buildingColor = "#3355ff";
 
         this.map.animateTo({
@@ -43,15 +45,13 @@ class Twin3d {
 
 
 
-
-
         this.mapLayer();
         this.threeLayer(oData);
 
-                // need to have it for mouse click on 3d objects
+        // need to have it for mouse click on 3d objects
         this.raycaster = new THREE.Raycaster();
         this.mouse = new THREE.Vector2();
-       // this.scene = cont.threeLayer.getScene();
+        // this.scene = cont.threeLayer.getScene();
         //this.camera = cont.threeLayer.getCamera();
 
 
