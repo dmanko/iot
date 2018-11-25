@@ -85,9 +85,9 @@ public class IoTRequest {
 	public static void main(String[] args) {
 		
 		IoTRequest request = new IoTRequest();
-		System.out.println(request.getJSONForDeviceCreation("IOT-SECURUTY-FLOOR-1C"));
+		System.out.println(request.getJSONForDeviceCreation("IOT-SECURITY-FLOOR-1C"));
 		
-		System.out.println(request.getJSONForSensorCreation("IOT-SECURUTY-FLOOR-1C", "14"));
+		System.out.println(request.getJSONForSensorCreation("IOT-SECURITY-FLOOR-1C", "14"));
 	}
 	
 

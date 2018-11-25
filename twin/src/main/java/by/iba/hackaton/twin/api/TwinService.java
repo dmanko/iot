@@ -266,8 +266,12 @@ public class TwinService {
 			
 		} catch (Exception ex) {
 			ex.printStackTrace();
+			retVal.add(ex.getLocalizedMessage());
+			return retVal;
+			
 		} finally {
 			em.close();
+			
 		}
 
 		return retVal;
