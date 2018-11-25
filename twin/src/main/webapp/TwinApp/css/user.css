@@ -1,4 +1,6 @@
-html.sap-desktop .sapMShellAppWidthLimited .sapMShellCentralBox {
-    width: 1700px !important;
-    margin-left: -850px !important;
+@media (min-width:1700px){
+	html.sap-desktop .sapMShellAppWidthLimited .sapMShellCentralBox {
+	    width: 1700px !important;
+	    margin-left: -850px !important;
+	}
 }

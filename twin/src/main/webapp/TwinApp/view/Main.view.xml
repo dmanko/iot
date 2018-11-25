@@ -33,8 +33,7 @@
 						<l:HorizontalLayout>
 							<core:HTML preferDOM="true" content="&lt;div style='text-align: left'&gt;&lt;canvas id='__viewPort' width='800' height='600'/&gt;&lt;/div&gt;">
 							</core:HTML>
-							<Panel width="5%" height="34px" role="Region"/>
-							<l:VerticalLayout>
+							<l:VerticalLayout class="sapUiSmallMargin">
 								<SearchField liveChange="onSearchSens" value="{local>/app/query}" width="250px"/>
 								<ScrollContainer
 									id="scrollCont"

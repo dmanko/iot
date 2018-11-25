@@ -285,8 +285,14 @@
 
 	}
 
-	Twin3d.prototype.selectFromUI = function(ids, clickedID) {
-		if (!ids.includes(clickedID)) ids.push(clickedID);
+	Twin3d.prototype.selectFromUI = function(idsAll, clickedID) {
+		ids = [idsAll[0],idsAll[1]];
+		if (ids[0] || ids[1]) 
+		{
+
+		} else 	if (clickedID&&(!ids.includes(clickedID))) ids.push(clickedID);
+
+
 		if (clickedID.includes('FLOOR')) {
 			let floor = parseInt(clickedID.substr(6, 1));
 			//	if ((!cont.selectedFloor) || ((cont.selectedFloor) && (cont.selectedFloor != floor))) {
@@ -376,6 +382,7 @@
 
 
 	Twin3d.prototype.showPath = function(path) {
+		console.log(path);
 		if (!path) return;
 		//reset all
 		cont.scene.remove(cont.pathLine);
@@ -390,13 +397,13 @@
 		let meshTo = {};
 		let topFloor = 0;
 		var material = new THREE.LineBasicMaterial({
-			color: 0xffffff,
-			linewidth: 5,
+			color: 0xffff00,
+			linewidth: 1,
 			linecap: 'round', //ignored by WebGLRenderer
 			linejoin: 'round' //ignored by WebGLRenderer
 		});
 		//pathLine 		
-		var geometry = new THREE.Geometry();
+		var points = [];
 
 		path.some(function(toSplit) {
 			// split "1: id-1, id-2" into array			
@@ -414,19 +421,25 @@
 			if (topFloor < meshTo.properties.floor)
 				topFloor = meshTo.properties.floor
 			// color path object, pass intensivity			
-			cont.highLightPath(meshFrom, number / (path.length + 1));
+			cont.highLightPath(meshFrom, number / (path.length + 1)/2);
 			//add path line point			
 			if (meshFrom != 'MAIN')
-				geometry.vertices.push(cont.getCenterPoint(meshFrom));
+				points.push(cont.getCenterPoint(meshFrom));
 
 		})
 		//finish path line		
 		if (meshTo != 'MAIN')
-			geometry.vertices.push(cont.getCenterPoint(meshTo));
+			points.push(cont.getCenterPoint(meshTo));
+		var curve = new THREE.CatmullRomCurve3(points, false, "catmullrom");
+		
+		var pointsAll = curve.getPoints(points.length*3);
+		var geometry = new THREE.Geometry();
+		geometry.vertices = pointsAll;
+
 		cont.pathLine = new THREE.Line(geometry, material);
 		cont.scene.add(cont.pathLine);
 		//color last object
-		let intensivity = (number + 1) / (path.length + 1);
+		let intensivity = (number + 1) / (path.length + 1)/2;
 		cont.highLightPath(cont.getMeshById(idTo), intensivity);
 
 
