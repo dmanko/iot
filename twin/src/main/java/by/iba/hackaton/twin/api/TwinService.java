@@ -245,7 +245,7 @@ public class TwinService {
 			Connection connection = getDataSource().getConnection();
 	        try {
 	            PreparedStatement pstmt = connection
-	                    .prepareStatement(" CALL \"ENTERPRISE_TWIN\".\"getRouting\"('" + nodeID1 + "', '" + nodeID2 + "', ?, ?)");
+	                    .prepareStatement(" CALL \"ENTERPRISE_TWIN\".\"TwinRoutingShortestPath\"('" + nodeID1 + "', '" + nodeID2 + "', ?, ?)");
 	            ResultSet rs = pstmt.executeQuery();
 	    
 	            while (rs.next()) {
