@@ -1,0 +1,7 @@
+TRUNCATE TABLE "ENTERPRISE_TWIN"."nodes";
+TRUNCATE TABLE "ENTERPRISE_TWIN"."edges";
+
+DROP SEQUENCE "ENTERPRISE_TWIN"."SEQ4EDGES";
+CREATE SEQUENCE "ENTERPRISE_TWIN"."SEQ4EDGES";
+
+insert into "ENTERPRISE_TWIN"."nodes" ("nodeID", "levelID", "nodeType", "floor") values('MAIN','0','geometry','0');
