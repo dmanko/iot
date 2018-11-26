@@ -7,7 +7,6 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -29,12 +28,16 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.SecurityContext;
 
+import org.apache.commons.codec.binary.Base64;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import com.sap.core.connectivity.api.DestinationException;
+import com.sap.core.connectivity.api.configuration.DestinationConfiguration;
+import com.sap.core.connectivity.api.http.HttpDestination;
 
 import by.iba.hackaton.twin.model.Node;
 
@@ -67,7 +70,7 @@ public class TwinService {
 	
 	public static Connection getConnection() {
 
-	    setupSOCKS();
+//	    setupSOCKS();
 
 	    try {
 	      Class.forName("com.sap.db.jdbc.Driver");
@@ -81,7 +84,10 @@ public class TwinService {
 	    try {
 	      System.out.println("Start");
 	      connection = DriverManager.getConnection(
-	        "jdbc:sap://demo21.sap.iba:12345/?autocommit=false", "DMANKO", "Leonardo123");
+	        "jdbc:sap://demo21.sap.iba:12345/?autocommit=false&" 
+					  + "proxyHostName=localhost&"
+					  + "proxyPort=20004&"
+					  + "proxyScpAccount=ad3c495bb.iba", "DMANKO", "Leonardo123");
 	      
 	      /*
 	       * jdbc:sap://virtual-hostname-for-hana:30215/?autocommit=false&
@@ -131,8 +137,8 @@ public class TwinService {
 
 	  private static String setSOCKS5ProxyAuthentication(String subaccount, String locationId) {
 	
-	    final String encodedSubaccount = new String(Base64.getEncoder().encodeToString(subaccount.getBytes()));
-	    final String encodedLocationId = new String(Base64.getEncoder().encodeToString(locationId.getBytes()));
+	    final String encodedSubaccount = new String(Base64.encodeBase64(subaccount.getBytes()));
+	    final String encodedLocationId = new String(Base64.encodeBase64(locationId.getBytes()));
 
 	    Authenticator.setDefault(new Authenticator() {
 	      @Override
@@ -331,7 +337,7 @@ public class TwinService {
 			storedProcedure.execute();*/
 			
 //			Connection connection = getDataSource().getConnection();
-			Connection connection = getConnection();
+			Connection connection = inCloud() ?  getConnection() : getDataSource().getConnection();
 			
 	        try {
 	            PreparedStatement pstmt = connection
@@ -422,6 +428,18 @@ public class TwinService {
 		props.put("tenant.id", userName);
 
 		return this.getEntityManagerFactory().createEntityManager(props);
+		
+	}
+	
+	
+	private boolean inCloud() throws NamingException, DestinationException {
+			
+		javax.naming.Context ctx = new InitialContext();
+		HttpDestination destination = (HttpDestination) ctx.lookup("java:comp/env/" +  "RUNTIME_CHECK");
+		
+		//TODO boolean inCloud()
+
+		return false;
 		
 	}
 		

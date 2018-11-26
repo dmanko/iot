@@ -3,6 +3,7 @@
 		   xmlns="sap.m"
 		   xmlns:l="sap.ui.layout"
 		   xmlns:mi="sap.suite.ui.microchart"
+		   xmlns:rte="sap.ui.richtexteditor"
 		   controllerName="TwinApp.controller.Main"
 		   height="100%">
 
@@ -34,10 +35,15 @@
 							<core:HTML preferDOM="true" content="&lt;div style='text-align: left'&gt;&lt;canvas id='__viewPort' width='800' height='600'/&gt;&lt;/div&gt;">
 							</core:HTML>
 							<l:VerticalLayout class="sapUiSmallMargin">
+								<Toolbar>
+									<ToolbarSpacer />
+									<Button text="{i18n>BTN_PROPS}" press="onToProps" enabled="true"/>
+									<Button text="{i18n>BTN_FINDROUTE}" press="onFindRoute" enabled="{local>/app/isRouteFindPossible}"/>
+								</Toolbar>
 								<SearchField liveChange="onSearchSens" value="{local>/app/query}" width="250px"/>
 								<ScrollContainer
 									id="scrollCont"
-									height="340px"
+									height="250px"
 									width="250px"
 									horizontal="true"
 									vertical="true"
@@ -57,14 +63,11 @@
 													<Text text="{local>objectName}"  visible="{=!${local>isVisible}}"/>
 												</items>
 											</HBox>
-										</CustomTreeItem>										
+										</CustomTreeItem>
 									</Tree>
 								</ScrollContainer>
 							</l:VerticalLayout>
 						</l:HorizontalLayout>
-						<HBox>
-							<Button text="{i18n>BTN_FINDROUTE}" press="onFindRoute" enabled="{local>/app/isRouteFindPossible}"/>
-						</HBox>
 					</IconTabFilter>
 					<IconTabFilter  key="tabInfo" text="{i18n>TX_TAB2}" icon="sap-icon://detail-view">
 						<l:VerticalLayout class="sapUiContentPadding" width="100%">
@@ -146,6 +149,15 @@
 							</HBox>
 						</l:content>	
 						</l:VerticalLayout>
+					</IconTabFilter>
+					<IconTabFilter  key="tabFeedback" text="{i18n>TX_TAB3}" icon="sap-icon://letter">
+					<l:VerticalLayout calss="sapUiContentPadding" width="100%">
+						<Label text="{i18n>LAB_FIO}" labelFor="inputFIO"  required="true"/>
+						<Input id="inputFIO" value="{local>/feedback/fio}"/>
+						<Label text="{i18n>LAB_FEEDBACK}" labelFor="inputFIO" required="true"/>
+						<TextArea placeholder="{i18n>TXT_FEEDBACK_PH}" value="{local>/feedback/text}"  rows="15" width="100%"/>
+						<Button text="{i18n>BTN_SEND}" press="onPressBtnSend"/>
+					</l:VerticalLayout>
 					</IconTabFilter>
 				</items>
 			</IconTabBar>

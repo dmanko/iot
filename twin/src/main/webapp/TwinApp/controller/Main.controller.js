@@ -61,7 +61,6 @@ sap.ui.define([
 			/// do you 3D visualisation
 			var oModel = this.getView().getModel("local");
 			var selectedObj = oModel.getProperty("/app/selectedObj");
-//			twin3d.selectFromUI(selectedObj, nodeID);
 			twin3d.selectFromUI(selectedObj, nodeID);
 
 		},
@@ -145,7 +144,6 @@ sap.ui.define([
 			}
 		},
 
-
 		onFindRoute: function(oEvent) {
 			var oModel = this.getView().getModel("local");
 			var selectedObj = oModel.getProperty("/app/selectedObj");
@@ -154,6 +152,11 @@ sap.ui.define([
 			DataUtil.getPath(selectedObj[0], selectedObj[1], this._onPathLoaded, this._onLoadFail, this);
 		},
 
+		onPressBtnSend: function (oEvent) {
+			var oModel = this.getView().getModel("local");
+			var feedBack = oModel.getProperty("/feedback");
+		},
+		
 		//
 		// private methods
 		//
@@ -180,6 +183,10 @@ sap.ui.define([
 					devMsg: "1)first\n2)secondt\n3)Third\n",
 					temperature: [22, 25, 29, 28, 21, 19, 21],
 					humidity: [40, 55, 45, 50, 58, 50, 52]
+				},
+				feedback: {
+					fio:"",
+					text:""
 				}
 			});
 		},
@@ -341,7 +348,7 @@ sap.ui.define([
 			var dims = aTabBarContent.getBoundingClientRect();
 			
 			var vpWidth = Math.floor(((dims.width - 250) * percent) / (100 * pxRatio)); 
-			var vpHeight = Math.floor(((dims.height)  * percent) / (200 *  pxRatio));
+			var vpHeight = Math.floor(((dims.height)  * percent) / (185 *  pxRatio));
 			
 			console.log("w:" + vpWidth + " h: " + vpHeight + ", pr: " + pxRatio);
 			
