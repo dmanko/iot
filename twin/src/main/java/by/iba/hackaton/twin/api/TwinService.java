@@ -1,10 +1,13 @@
 package by.iba.hackaton.twin.api;
 
+import java.net.Authenticator;
+import java.net.PasswordAuthentication;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -32,7 +35,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import by.iba.hackaton.twin.model.Edge;
+
 import by.iba.hackaton.twin.model.Node;
 
 
@@ -60,6 +63,91 @@ import by.iba.hackaton.twin.model.Node;
 @Path("/svc")
 @Produces({ MediaType.APPLICATION_JSON })
 public class TwinService {
+	
+	
+	public static Connection getConnection() {
+
+	    setupSOCKS();
+
+	    try {
+	      Class.forName("com.sap.db.jdbc.Driver");
+	    } catch (ClassNotFoundException e) {
+	      System.out.println("Where is my JDBC Driver?");
+	      e.printStackTrace();
+	      return null;
+	    }
+
+	    Connection connection = null;
+	    try {
+	      System.out.println("Start");
+	      connection = DriverManager.getConnection(
+	        "jdbc:sap://demo21.sap.iba:12345/?autocommit=false", "DMANKO", "Leonardo123");
+	      
+	      /*
+	       * jdbc:sap://virtual-hostname-for-hana:30215/?autocommit=false&
+					  proxyHostName=localhost&
+					  proxyPort=20004&
+					  proxyScpAccount=SUBACCOUNT.LOCATIONID
+	       */
+	    } catch (SQLException e) {
+	      System.err.println("Connection Failed. Message: " + e.getMessage());
+	      return null;
+	    }
+	    /*if (connection != null) {
+	      try {
+	        System.out.println("Connection to HANA successful!");
+	        java.sql.Statement stmt = connection.createStatement();
+	        ResultSet resultSet = stmt.executeQuery("select * from SCHEMA.TABLE where " + filter);
+	        while (resultSet.next()) {
+	          String id = resultSet.getString("COLUMN");
+	          System.out.println("Output: " + id );
+	          return id;
+	        }
+	      } catch (SQLException e) {
+	        System.err.println("Query failed! Message: " + e.getMessage());
+	      } finally {
+	        try {
+	          connection.close();
+	        } catch (SQLException e) {
+	          // TODO Auto-generated catch block
+	          e.printStackTrace();
+	          return "Error";
+	        }
+	      }
+	    }*/
+	    return connection;
+	    
+	  }
+
+	  private static void setupSOCKS() {
+
+	    String auth = setSOCKS5ProxyAuthentication("ad3c495bb", "iba");
+
+	    System.setProperty("socksProxyHost", "localhost");
+	    System.setProperty("socksProxyPort", "20004");
+	    System.setProperty("java.net.socks.username", auth);
+
+	  }
+
+	  private static String setSOCKS5ProxyAuthentication(String subaccount, String locationId) {
+	
+	    final String encodedSubaccount = new String(Base64.getEncoder().encodeToString(subaccount.getBytes()));
+	    final String encodedLocationId = new String(Base64.getEncoder().encodeToString(locationId.getBytes()));
+
+	    Authenticator.setDefault(new Authenticator() {
+	      @Override
+	      protected PasswordAuthentication getPasswordAuthentication() {
+	        return new PasswordAuthentication("1." + encodedSubaccount + "." + encodedLocationId, new char[] {});
+	      }
+	    });
+
+	    return "1." + encodedSubaccount + "." + encodedLocationId;
+	  }
+
+	
+	
+	
+	
 	private DataSource dataSource = null;
 
     /**
@@ -242,7 +330,9 @@ public class TwinService {
 
 			storedProcedure.execute();*/
 			
-			Connection connection = getDataSource().getConnection();
+//			Connection connection = getDataSource().getConnection();
+			Connection connection = getConnection();
+			
 	        try {
 	            PreparedStatement pstmt = connection
 	                    .prepareStatement(" CALL \"ENTERPRISE_TWIN\".\"TwinRoutingShortestPath\"('" + nodeID1 + "', '" + nodeID2 + "', ?, ?)");
@@ -312,7 +402,7 @@ public class TwinService {
 			Map properties = new HashMap();
 
 			DataSource ds = this.getDataSource();
-
+			
 			properties.put(PersistenceUnitProperties.NON_JTA_DATASOURCE, ds);
 
 			retVal = Persistence.createEntityManagerFactory("application", properties);
