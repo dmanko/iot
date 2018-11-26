@@ -27,7 +27,7 @@ public class IoTRequest {
 	
 
 	@SuppressWarnings("unchecked")
-	private String getJSONForDeviceCreation(String deviceName) {
+	public static String getJSONForDeviceCreation(String deviceName) {
 		
 		JSONObject rootJson = new JSONObject();
 		rootJson.put("gatewayId", REST_GATEWAY_ID); 
@@ -59,7 +59,7 @@ public class IoTRequest {
 */	
 	
 	@SuppressWarnings("unchecked")
-	private String getJSONForSensorCreation(String deviceName, String deviceID) {
+	public static String getJSONForSensorCreation(String deviceName, String deviceID) {
 		
 		JSONObject rootJson = new JSONObject();
 		String sensorTypeId = "";
@@ -85,9 +85,9 @@ public class IoTRequest {
 	public static void main(String[] args) {
 		
 		IoTRequest request = new IoTRequest();
-		System.out.println(request.getJSONForDeviceCreation("IOT-SECURITY-FLOOR-1C"));
+		System.out.println(request.getJSONForDeviceCreation("IOT-WINDOWLOCK-HALL-1B-1"));
 		
-		System.out.println(request.getJSONForSensorCreation("IOT-SECURITY-FLOOR-1C", "14"));
+		System.out.println(request.getJSONForSensorCreation("IOT-WINDOWLOCK-HALL-1B-1", "15"));
 	}
 	
 

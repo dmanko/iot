@@ -20,7 +20,10 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 import javax.sql.DataSource;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -39,6 +42,7 @@ import com.sap.core.connectivity.api.DestinationException;
 import com.sap.core.connectivity.api.configuration.DestinationConfiguration;
 import com.sap.core.connectivity.api.http.HttpDestination;
 
+import by.iba.hackaton.twin.model.Feedback;
 import by.iba.hackaton.twin.model.Node;
 
 
@@ -374,6 +378,46 @@ public class TwinService {
 	}
 	
 	
+	@SuppressWarnings("unchecked")
+	@GET
+	@Path("/feedbacks")
+	public List<Feedback> getFeedbacks(@Context SecurityContext ctx) {
+		List<Feedback> retVal = null;
+
+		EntityManager em = this.getEntityManager(ctx);
+		retVal = em.createNamedQuery("Feedback.findAll").getResultList();
+
+		return retVal;
+	}
+	
+
+	private int getFeedbackCount(@Context SecurityContext ctx) {
+		int retVal = 0;
+
+		EntityManager em = this.getEntityManager(ctx);
+		retVal = Integer.parseInt((String)em.createNamedQuery("Feedback.count").getSingleResult());
+
+		return retVal;
+	}
+	
+	@POST
+	@Path("/feedbacks")
+	@Consumes({ MediaType.APPLICATION_FORM_URLENCODED, MediaType.TEXT_PLAIN })
+	public void postFeedback(@FormParam(value = "name") String name, @FormParam(value = "message") String message, @Context SecurityContext ctx) {
+
+		EntityManager em = this.getEntityManager(ctx);
+		int counter = Integer.parseInt((String)em.createNamedQuery("Feedback.count").getSingleResult());
+		
+		Feedback feedback = new Feedback();
+		feedback.setId(counter);
+		feedback.setName(name);
+		feedback.setMessage(message);
+		
+		em.persist(feedback);
+		
+		em.close();
+
+	}
 	
 	
 	/**

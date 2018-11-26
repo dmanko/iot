@@ -3,6 +3,8 @@ package by.iba.hackaton.twin.api.iot;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.text.MessageFormat;
 
 import javax.naming.Context;
@@ -20,8 +22,13 @@ import javax.ws.rs.core.Response;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 import com.sap.core.connectivity.api.DestinationException;
 import com.sap.core.connectivity.api.http.HttpDestination;
@@ -35,11 +42,11 @@ public class IoTService
 	
 	private static final int COPY_CONTENT_BUFFER_SIZE = 1024;
 	
-	HttpClient httpClient = null;
-    HttpDestination destination = null;
+	private static HttpClient httpClient = null;
+    private static HttpDestination destination = null;
 	
 	@GET
-	@Path("/device/{id}")
+	@Path("/devices/{id}/measures")
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response getMeasuresForDevice(@PathParam(value = "id") String deviceId)
 	{
@@ -48,12 +55,12 @@ public class IoTService
 	    
         try {
             
-            final String baseURL = getDestination().getURI().toString();
+            final String baseURL = getIoTDestination().getURI().toString();
             String destinationURL = null;
             
             if (deviceId != null && deviceId.trim().length() > 0) 
             {
-            	destinationURL = MessageFormat.format("{0}/{1}/measures?orderby=timestamp&skip=0&top=100", baseURL, deviceId);
+            	destinationURL = MessageFormat.format("{0}/devices/{1}/measures?orderby=timestamp&skip=0&top=100", baseURL, deviceId);
             	
             } 
             
@@ -68,29 +75,24 @@ public class IoTService
             // copy content from the incoming response to the outgoing response
             HttpEntity responseEntity = null;
             
-            if (httpResponse != null)
-            {
+            if (httpResponse != null) {
             	responseEntity = httpResponse.getEntity();
             }
             
             msgBody = getResponseBodyasString(responseEntity);
             
-            if (statusCode == HttpServletResponse.SC_OK) 
-            {
+            if (statusCode == HttpServletResponse.SC_OK) {
                 return Response.ok(msgBody).build();
             }
-            else
-            {
+            else {
             	return Response.status(statusCode).entity(msgBody).build();
             }
 
         } 
-        catch (RuntimeException e) 
-        {
+        catch (RuntimeException e) {
             // In case of an unexpected exception we abort the HTTP request 
         	// in order to shut down the underlying connection immediately.
-            if (httpGet != null)
-            {
+            if (httpGet != null) {
             	httpGet.abort();
             }
         	
@@ -101,27 +103,20 @@ public class IoTService
             
             msgBody = errorMessage;
         } 
-        catch (NamingException e) 
-        {
+        catch (NamingException e) {
             // Lookup of destination failed
             String errorMessage = "Lookup of destination failed with reason: "
                     + e.getMessage()
                     + ". See "
                     + "logs for details. Hint: Make sure to have the destination "
-                    + "[openweathermap-destination]" + " configured.";
+                    + "[IOT_GATEWAY_REST_CLIENT]" + " configured.";
             
             msgBody = errorMessage;
         } 
-        catch (Exception e) 
-        {
+        catch (Exception e) {
             // Connectivity operation failed
             String errorMessage = "Connectivity operation failed with reason: "
-                    + e.getMessage()
-                    + ". See "
-                    + "logs for details. Hint: Make sure to have an HTTP proxy configured in your "
-                    + "local Eclipse environment in case your environment uses "
-                    + "an HTTP proxy for the outbound Internet "
-                    + "communication.";
+                    + e.getMessage();
             
             msgBody = errorMessage;
         } 
@@ -129,9 +124,8 @@ public class IoTService
         {
             // When HttpClient instance is no longer needed, shut down the connection manager to ensure immediate
             // deallocation of all system resources
-            if (httpClient != null) 
-            {
-                httpClient.getConnectionManager().shutdown();
+            if (httpClient != null) {
+                httpClient.getConnectionManager().closeExpiredConnections();
             }
         }
         
@@ -141,15 +135,105 @@ public class IoTService
 	
 	
 	@POST
-	@Path("/device/create")
+	@Path("/devices")
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String createDevice(@FormParam(value = "deviceName") String deviceNodeId){
+	public String createDeviceAndSensor(@FormParam(value = "deviceName") String deviceNodeId){
 		
+	    String responseBody = null;
+	    String requestJsonBody = null;
+	    
+        try {
+            
+            final String baseURL = getIoTDestination().getURI().toString();
+            String destinationURL = baseURL + "/devices";
+            
+            if (deviceNodeId != null && deviceNodeId.trim().length() > 0) {
+            	
+            	requestJsonBody = IoTRequest.getJSONForDeviceCreation(deviceNodeId);
+            } 
+
+            HttpResponse httpResponse = doPost(destinationURL, requestJsonBody);
+            
+            // Check response status code
+            int statusCode = httpResponse.getStatusLine().getStatusCode();
+            // copy content from the incoming response to the outgoing response
+            HttpEntity responseEntity = null;
+            
+            if (httpResponse != null) {
+            	responseEntity = httpResponse.getEntity();
+            }
+            
+            responseBody = getResponseBodyasString(responseEntity);
+            
+            if (statusCode == HttpServletResponse.SC_OK) {
+                System.out.println(Response.ok(responseBody).build().toString());
+                
+                JSONParser parser = new JSONParser();
+                JSONObject json = (JSONObject)parser.parse(responseBody);
+                
+                String deviceId = (String) json.get("id");
+                
+                destinationURL = baseURL + "/sensors";
+                requestJsonBody = IoTRequest.getJSONForSensorCreation(deviceNodeId, deviceId);
+                httpResponse = doPost(destinationURL, requestJsonBody);
+                statusCode = httpResponse.getStatusLine().getStatusCode();
+                if (httpResponse != null) {
+                	responseEntity = httpResponse.getEntity();
+                }
+                responseBody = getResponseBodyasString(responseEntity);
+                
+                return responseBody;
+            }
+            else {
+            	System.out.println(Response.status(statusCode).entity(responseBody).build().toString());
+            }
+
+
+        } 
+        catch (NamingException e) {
+            // Lookup of destination failed
+            String errorMessage = "Lookup of destination failed with reason: " + e.getLocalizedMessage();
+            responseBody = errorMessage;
+        } 
+        catch (Exception e) {
+            // Connectivity operation failed
+            String errorMessage = "Connectivity operation failed with reason: " + e.getLocalizedMessage();
+            
+            responseBody = errorMessage;
+        } 
+
+        finally 
+        {
+            // When HttpClient instance is no longer needed, shut down the connection manager to ensure immediate
+            // deallocation of all system resources
+            if (httpClient != null) {
+                httpClient.getConnectionManager().closeExpiredConnections();
+            }
+        }
+        
+        // if we end up here something went really bad
+        System.out.println(Response.serverError().build().toString());
+        
+        return responseBody;
 		
-		
-		return "";
 	}
 	
+	
+	private HttpResponse doPost(String destinationURL, String requestJsonBody) throws ClientProtocolException, IOException, DestinationException, NamingException {
+		
+        System.out.println("REST Client target URL: " + destinationURL);
+        // Execute HTTP request
+        HttpPost httpPost = new HttpPost(destinationURL);
+
+        StringEntity payload = new StringEntity(requestJsonBody, "UTF-8");
+        httpPost.setEntity(payload);
+        
+        httpPost.setHeader("Content-type", "application/json");
+        httpPost.setHeader("Accept", "application/json");
+        
+       return getHttpClient().execute(httpPost);
+		
+	}
 	
 	/**
 	 * Extracts the response body from the specified {@link HttpEntity} and returns it as a UTF-8 encoded String.
@@ -162,13 +246,11 @@ public class IoTService
 	{
 		String retVal = null;
 		
-		if (entity != null) 
-        {
+		if (entity != null) {
             InputStream instream = entity.getContent();
             ByteArrayOutputStream outstream = new ByteArrayOutputStream();
             
-            try 
-            {
+            try {
                 byte[] buffer = new byte[COPY_CONTENT_BUFFER_SIZE];
                 int len;
                 while ((len = instream.read(buffer)) != -1) 
@@ -176,21 +258,17 @@ public class IoTService
                 	outstream.write(buffer, 0, len);
                 }
             } 
-            catch (IOException e) 
-            {
+            catch (IOException e)  {
                 // In case of an IOException the connection will be released
                 // back to the connection manager automatically
                 throw e;
             } 
-            finally 
-            {
+            finally  {
                 // Closing the input stream will trigger connection release
-                try 
-                {
+                try {
                     instream.close();
                 } 
-                catch (Exception e) 
-                {
+                catch (Exception e)  {
                 // Ignore
                 }
             }
@@ -203,24 +281,24 @@ public class IoTService
 	
 	
 	
-	private HttpClient getHttpClient () throws DestinationException, NamingException {
+	public static HttpClient getHttpClient () throws DestinationException, NamingException {
 		
-		if (this.httpClient == null) {
+		if (httpClient == null) {
 			// Get HTTP destination
-	        this.httpClient = getDestination().createHttpClient();
+	        httpClient = getIoTDestination().createHttpClient();
 		}
 		
-		return this.httpClient;
+		return httpClient;
 		
 	}
 	
-	private HttpDestination getDestination() throws NamingException {
-		if (this.destination == null) {
+	public static HttpDestination getIoTDestination() throws NamingException {
+		if (destination == null) {
 			Context ctx = new InitialContext();
-			this.destination = (HttpDestination) ctx.lookup("java:comp/env/" +  "IOT_GATEWAY_REST_CLIENT");
+			destination = (HttpDestination) ctx.lookup("java:comp/env/" +  "IOT_GATEWAY_REST_CLIENT");
 		}
 		
-		return this.destination;
+		return destination;
 		
 	}
 	

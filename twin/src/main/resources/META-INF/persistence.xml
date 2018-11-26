@@ -11,6 +11,7 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/persistence     http://java.sun.c
 	<non-jta-data-source>jdbc/DefaultDB</non-jta-data-source>
 	<class>by.iba.hackaton.twin.model.Edge</class>
 	<class>by.iba.hackaton.twin.model.Node</class>
+	<class>by.iba.hackaton.twin.model.Feedback</class>
 	
 	<exclude-unlisted-classes>true</exclude-unlisted-classes>
 	<properties>
