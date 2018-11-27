@@ -3,8 +3,7 @@ package by.iba.hackaton.twin.api.iot;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
+import java.net.URISyntaxException;
 import java.text.MessageFormat;
 
 import javax.naming.Context;
@@ -50,87 +49,56 @@ public class IoTService
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response getMeasuresForDevice(@PathParam(value = "id") String deviceId)
 	{
-	    HttpGet httpGet = null;
-	    String msgBody = null;
-	    
-        try {
             
-            final String baseURL = getIoTDestination().getURI().toString();
-            String destinationURL = null;
+       String destinationURL = null;
             
-            if (deviceId != null && deviceId.trim().length() > 0) 
-            {
-            	destinationURL = MessageFormat.format("{0}/devices/{1}/measures?orderby=timestamp&skip=0&top=100", baseURL, deviceId);
-            	
-            } 
-            
-            System.out.println("REST Client target URL: " + destinationURL);
-            // Execute HTTP request
-            httpGet = new HttpGet(destinationURL);
- 
-            HttpResponse httpResponse = getHttpClient().execute(httpGet);
-            // Check response status code
-            int statusCode = httpResponse.getStatusLine().getStatusCode();
-            
-            // copy content from the incoming response to the outgoing response
-            HttpEntity responseEntity = null;
-            
-            if (httpResponse != null) {
-            	responseEntity = httpResponse.getEntity();
-            }
-            
-            msgBody = getResponseBodyasString(responseEntity);
-            
-            if (statusCode == HttpServletResponse.SC_OK) {
-                return Response.ok(msgBody).build();
-            }
-            else {
-            	return Response.status(statusCode).entity(msgBody).build();
-            }
+       if (deviceId != null && deviceId.trim().length() > 0) {
+    	   destinationURL = MessageFormat.format("{0}/devices/{1}/measures?orderby=timestamp&skip=0&top=100", getBaseURL(), deviceId);
 
-        } 
-        catch (RuntimeException e) {
-            // In case of an unexpected exception we abort the HTTP request 
-        	// in order to shut down the underlying connection immediately.
-            if (httpGet != null) {
-            	httpGet.abort();
-            }
-        	
-            // unexpected runtime error
-            String errorMessage = "'Houston, we have a problem!' : "
-                    + e.getMessage()
-                    + ". See logs for details.";
+       } 
+       
+       return doGet(destinationURL);
             
-            msgBody = errorMessage;
-        } 
-        catch (NamingException e) {
-            // Lookup of destination failed
-            String errorMessage = "Lookup of destination failed with reason: "
-                    + e.getMessage()
-                    + ". See "
-                    + "logs for details. Hint: Make sure to have the destination "
-                    + "[IOT_GATEWAY_REST_CLIENT]" + " configured.";
+    }
+
+
+	private String getBaseURL() {
+		
+		String baseURL = null;
+		
+		try {
+			baseURL = getIoTDestination().getURI().toString();
+		} catch (URISyntaxException | NamingException e) {
+			System.out.println(e.getLocalizedMessage());
+		}
+		   
+		return baseURL;
+	}
+	
+	
+	@GET
+	@Path("/devices/{id}")
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Response getDeviceInfo(@PathParam(value = "id") String deviceId)
+	{
+		String destinationURL = null;
+
+		if (deviceId != null && deviceId.trim().length() > 0) {
+			destinationURL = MessageFormat.format("{0}/devices/{1}", getBaseURL(), deviceId);
+
+		} 
             
-            msgBody = errorMessage;
-        } 
-        catch (Exception e) {
-            // Connectivity operation failed
-            String errorMessage = "Connectivity operation failed with reason: "
-                    + e.getMessage();
-            
-            msgBody = errorMessage;
-        } 
-        finally 
-        {
-            // When HttpClient instance is no longer needed, shut down the connection manager to ensure immediate
-            // deallocation of all system resources
-            if (httpClient != null) {
-                httpClient.getConnectionManager().closeExpiredConnections();
-            }
-        }
-        
-        // if we end up here something went really bad
-        return Response.serverError().build();
+		return doGet(destinationURL);     
+    }
+	
+	@GET
+	@Path("/devices")
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Response getDevices()
+	{
+		String destinationURL = getBaseURL() + "/devices";
+
+		return doGet(destinationURL);     
     }
 	
 	
@@ -232,6 +200,85 @@ public class IoTService
         httpPost.setHeader("Accept", "application/json");
         
        return getHttpClient().execute(httpPost);
+		
+	}
+	
+	
+	private Response doGet(String destinationURL) {
+		
+		HttpGet httpGet = null;
+	    String msgBody = null;
+		
+		try {
+            
+            System.out.println("REST Client target URL: " + destinationURL);
+            // Execute HTTP request
+            httpGet = new HttpGet(destinationURL);
+ 
+            HttpResponse httpResponse = getHttpClient().execute(httpGet);
+            // Check response status code
+            int statusCode = httpResponse.getStatusLine().getStatusCode();
+            
+            // copy content from the incoming response to the outgoing response
+            HttpEntity responseEntity = null;
+            
+            if (httpResponse != null) {
+            	responseEntity = httpResponse.getEntity();
+            }
+            
+            msgBody = getResponseBodyasString(responseEntity);
+            
+            if (statusCode == HttpServletResponse.SC_OK) {
+                return Response.ok(msgBody).build();
+            }
+            else {
+            	return Response.status(statusCode).entity(msgBody).build();
+            }
+
+        } 
+        catch (RuntimeException e) {
+            // In case of an unexpected exception we abort the HTTP request 
+        	// in order to shut down the underlying connection immediately.
+            if (httpGet != null) {
+            	httpGet.abort();
+            }
+        	
+            // unexpected runtime error
+            String errorMessage = "'Houston, we have a problem!' : "
+                    + e.getMessage()
+                    + ". See logs for details.";
+            
+            msgBody = errorMessage;
+        } 
+        catch (NamingException e) {
+            // Lookup of destination failed
+            String errorMessage = "Lookup of destination failed with reason: "
+                    + e.getMessage()
+                    + ". See "
+                    + "logs for details. Hint: Make sure to have the destination "
+                    + "[IOT_GATEWAY_REST_CLIENT]" + " configured.";
+            
+            msgBody = errorMessage;
+        } 
+        catch (Exception e) {
+            // Connectivity operation failed
+            String errorMessage = "Connectivity operation failed with reason: "
+                    + e.getMessage();
+            
+            msgBody = errorMessage;
+        } 
+        finally 
+        {
+            // When HttpClient instance is no longer needed, shut down the connection manager to ensure immediate
+            // deallocation of all system resources
+            if (httpClient != null) {
+                httpClient.getConnectionManager().closeExpiredConnections();
+            }
+        }
+        
+        // if we end up here something went really bad
+        return Response.serverError().build();
+    
 		
 	}
 	
