@@ -11,13 +11,10 @@
 		responsive="true"
 		condensed="true"
 		fullScreenOptimized="true"
-		icon="sap-icon://employee"
-		iconAlt="sap-icon://SAP-icons-TNT/user"
-		intro="{local>/hdr/position}"
-		title="{local>/hdr/fio}"
+			
 		titleActive="false"
 		number=" "
-		numberUnit="{local>/hdr/phone} / {local>/hdr/email}"
+	
 		backgroundDesign="Solid"
 		busy="{local>/app/busy}"
 		enableScrolling="false">
@@ -32,7 +29,7 @@
 				<items>
 					<IconTabFilter key="tab3D" text="{i18n>TX_TAB1}" icon="sap-icon://factory">
 						<l:HorizontalLayout>
-							<core:HTML preferDOM="true" content="&lt;div style='text-align: left'&gt;&lt;canvas id='__viewPort' width='800' height='600'/&gt;&lt;/div&gt;">
+							<core:HTML preferDOM="true" content="&lt;div style='text-align: left'&gt;&lt;canvas id='__viewPort' width='800' height='600'/&gt;&lt;div id='topleft'&gt;&lt;/div&gt;&lt;div id='topright'&gt;&lt;/div&gt;&lt;div id='bottom'&gt;&lt;/div&gt;&lt;/div&gt;">
 							</core:HTML>
 							<l:VerticalLayout class="sapUiSmallMargin">
 								<Toolbar>
@@ -107,18 +104,18 @@
 								<items>
 									<VBox fitContainer="true" width="100%">
 										<items>
-											<Text text="{i18n>TX_TEMP}" textAlign="Center" width="100%"/>
+											<Text text="{local>/senCurr/data1Name}" textAlign="Center" width="100%"/>
 											<FlexBox width="100%" height="10rem" alignItems="Center" class="sapUiSmallMargin">
 												<items>
 													<mi:InteractiveLineChart id="tempLineChart" selectionChanged="selectionChanged" press="press">
 														<mi:points>
-															<mi:InteractiveLineChartPoint value="{local>/senCurr/temperature/0}" label="{i18n>TX_MON}"/>
-															<mi:InteractiveLineChartPoint value="{local>/senCurr/temperature/1}" label="{i18n>TX_TUE}"/>
-															<mi:InteractiveLineChartPoint value="{local>/senCurr/temperature/2}" label="{i18n>TX_WED}"/>
-															<mi:InteractiveLineChartPoint value="{local>/senCurr/temperature/3}" label="{i18n>TX_THU}"/>
-															<mi:InteractiveLineChartPoint value="{local>/senCurr/temperature/4}" label="{i18n>TX_FRI}"/>
-															<mi:InteractiveLineChartPoint value="{local>/senCurr/temperature/5}" label="{i18n>TX_SAT}"/>
-															<mi:InteractiveLineChartPoint value="{local>/senCurr/temperature/6}" label="{i18n>TX_SUN}"/>
+															<mi:InteractiveLineChartPoint value="{local>/senCurr/data1/0}" label="{i18n>TX_MON}"/>
+															<mi:InteractiveLineChartPoint value="{local>/senCurr/data1/1}" label="{i18n>TX_TUE}"/>
+															<mi:InteractiveLineChartPoint value="{local>/senCurr/data1/2}" label="{i18n>TX_WED}"/>
+															<mi:InteractiveLineChartPoint value="{local>/senCurr/data1/3}" label="{i18n>TX_THU}"/>
+															<mi:InteractiveLineChartPoint value="{local>/senCurr/data1/4}" label="{i18n>TX_FRI}"/>
+															<mi:InteractiveLineChartPoint value="{local>/senCurr/data1/5}" label="{i18n>TX_SAT}"/>
+															<mi:InteractiveLineChartPoint value="{local>/senCurr/data1/6}" label="{i18n>TX_SUN}"/>
 														</mi:points>
 													</mi:InteractiveLineChart>
 												</items>
@@ -127,18 +124,18 @@
 									</VBox>
 									<VBox fitContainer="true" width="100%">
 										<items>
-											<Text text="{i18n>TX_HUM}" textAlign="Center" width="100%"/>	
+											<Text text="{local>/senCurr/data2Name}" textAlign="Center" width="100%"/>	
 											<FlexBox width="100%" height="10rem" alignItems="Center" class="sapUiSmallMargin">
 												<items>
 													<mi:InteractiveLineChart id="humLineChart" selectionChanged="selectionChanged" press="press">
 														<mi:points>
-															<mi:InteractiveLineChartPoint value="{local>/senCurr/humidity/0}" label="{i18n>TX_MON}"/>
-															<mi:InteractiveLineChartPoint value="{local>/senCurr/humidity/1}" label="{i18n>TX_TUE}"/>
-															<mi:InteractiveLineChartPoint value="{local>/senCurr/humidity/2}" label="{i18n>TX_WED}"/>
-															<mi:InteractiveLineChartPoint value="{local>/senCurr/humidity/3}" label="{i18n>TX_THU}"/>
-															<mi:InteractiveLineChartPoint value="{local>/senCurr/humidity/4}" label="{i18n>TX_FRI}"/>
-															<mi:InteractiveLineChartPoint value="{local>/senCurr/humidity/5}" label="{i18n>TX_SAT}"/>
-															<mi:InteractiveLineChartPoint value="{local>/senCurr/humidity/6}" label="{i18n>TX_SUN}"/>
+															<mi:InteractiveLineChartPoint value="{local>/senCurr/data2/0}" label="{i18n>TX_MON}"/>
+															<mi:InteractiveLineChartPoint value="{local>/senCurr/data2/1}" label="{i18n>TX_TUE}"/>
+															<mi:InteractiveLineChartPoint value="{local>/senCurr/data2/2}" label="{i18n>TX_WED}"/>
+															<mi:InteractiveLineChartPoint value="{local>/senCurr/data2/3}" label="{i18n>TX_THU}"/>
+															<mi:InteractiveLineChartPoint value="{local>/senCurr/data2/4}" label="{i18n>TX_FRI}"/>
+															<mi:InteractiveLineChartPoint value="{local>/senCurr/data2/5}" label="{i18n>TX_SAT}"/>
+															<mi:InteractiveLineChartPoint value="{local>/senCurr/data2/6}" label="{i18n>TX_SUN}"/>
 														</mi:points>
 													</mi:InteractiveLineChart>
 												</items>

@@ -10,6 +10,12 @@ class Twin3d {
         this.height = height;
         this.pathLine = {};
 
+        this.iotData = [];
+
+        this.content2d_1 = '';
+        this.content2d_2 = '';
+        this.content2d_3 = '';
+
         console.log('constr');
         //original map
         this.map = new maptalks.Map(el, {
@@ -57,6 +63,14 @@ class Twin3d {
 
 
         this.setEvents();
+
+
+        setInterval(function() {
+            cont.periodicTasks()
+        }, 1000);
+
+
+
     }
 
 

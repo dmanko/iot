@@ -2,6 +2,7 @@ package by.iba.hackaton.twin.api;
 
 import java.net.Authenticator;
 import java.net.PasswordAuthentication;
+import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -39,7 +40,6 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.sap.core.connectivity.api.DestinationException;
-import com.sap.core.connectivity.api.configuration.DestinationConfiguration;
 import com.sap.core.connectivity.api.http.HttpDestination;
 
 import by.iba.hackaton.twin.model.Feedback;
@@ -71,10 +71,13 @@ import by.iba.hackaton.twin.model.Node;
 @Produces({ MediaType.APPLICATION_JSON })
 public class TwinService {
 	
+	public static final String LOCAL = "http://localhost";
+	public static final String CLOUD = "http://cloud";
+	
 	
 	public static Connection getConnection() {
 
-//	    setupSOCKS();
+	    setupSOCKS();
 
 	    try {
 	      Class.forName("com.sap.db.jdbc.Driver");
@@ -88,10 +91,14 @@ public class TwinService {
 	    try {
 	      System.out.println("Start");
 	      connection = DriverManager.getConnection(
-	        "jdbc:sap://demo21.sap.iba:12345/?autocommit=false&" 
-					  + "proxyHostName=localhost&"
-					  + "proxyPort=20004&"
-					  + "proxyScpAccount=ad3c495bb.iba", "DMANKO", "Leonardo123");
+	        "jdbc:sap://demo21.sap.iba:12345/?autocommit=false", "DMANKO", "Leonardo123");
+	      
+	      /*
+	       * "jdbc:sap://demo21.sap.iba:12345/?autocommit=false&" 
+		  + "proxyHostName=localhost&"
+		  + "proxyPort=20004&"
+		  + "proxyScpAccount=ad3c495bb.iba", "DMANKO", "Leonardo123");
+		  */
 	      
 	      /*
 	       * jdbc:sap://virtual-hostname-for-hana:30215/?autocommit=false&
@@ -99,32 +106,14 @@ public class TwinService {
 					  proxyPort=20004&
 					  proxyScpAccount=SUBACCOUNT.LOCATIONID
 	       */
+	      if (connection != null) {
+	    	  System.out.println("Connection to on-premise HANA @demo21.sap.iba:12345 successful!");
+	      }
 	    } catch (SQLException e) {
 	      System.err.println("Connection Failed. Message: " + e.getMessage());
 	      return null;
 	    }
-	    /*if (connection != null) {
-	      try {
-	        System.out.println("Connection to HANA successful!");
-	        java.sql.Statement stmt = connection.createStatement();
-	        ResultSet resultSet = stmt.executeQuery("select * from SCHEMA.TABLE where " + filter);
-	        while (resultSet.next()) {
-	          String id = resultSet.getString("COLUMN");
-	          System.out.println("Output: " + id );
-	          return id;
-	        }
-	      } catch (SQLException e) {
-	        System.err.println("Query failed! Message: " + e.getMessage());
-	      } finally {
-	        try {
-	          connection.close();
-	        } catch (SQLException e) {
-	          // TODO Auto-generated catch block
-	          e.printStackTrace();
-	          return "Error";
-	        }
-	      }
-	    }*/
+	    
 	    return connection;
 	    
 	  }
@@ -400,25 +389,42 @@ public class TwinService {
 		return retVal;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@POST
 	@Path("/feedbacks")
-	@Consumes({ MediaType.APPLICATION_FORM_URLENCODED, MediaType.TEXT_PLAIN })
-	public void postFeedback(@FormParam(value = "name") String name, @FormParam(value = "message") String message, @Context SecurityContext ctx) {
+	@Consumes({ MediaType.APPLICATION_FORM_URLENCODED, MediaType.TEXT_PLAIN})
+	public List<Feedback> postFeedback(@FormParam(value = "name") String name, @FormParam(value = "message") String message, @Context SecurityContext ctx) {
 
+		List<Feedback> retVal = null;
+		
 		EntityManager em = this.getEntityManager(ctx);
-		int counter = Integer.parseInt((String)em.createNamedQuery("Feedback.count").getSingleResult());
 		
-		Feedback feedback = new Feedback();
-		feedback.setId(counter);
-		feedback.setName(name);
-		feedback.setMessage(message);
+		try {
+			
+			int counter = ((Long)em.createNamedQuery("Feedback.count").getSingleResult()).intValue();
+			
+			Feedback feedback = new Feedback();
+			feedback.setId(counter);
+			feedback.setName(name);
+			feedback.setMessage(message);
 		
-		em.persist(feedback);
-		
-		em.close();
+			em.getTransaction().begin();
+			em.persist(feedback);
+			em.getTransaction().commit();
+
+			retVal = em.createNamedQuery("Feedback.findAll").getResultList();
+
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		} finally {
+			em.close();
+		}
+
+		return retVal;
 
 	}
 	
+
 	
 	/**
 	 * Returns the <code>DefaultDB</code> {@link DataSource} via JNDI.
@@ -476,14 +482,26 @@ public class TwinService {
 	}
 	
 	
+	
+	private String getBaseURL(HttpDestination destination) {
+		
+		String baseURL = null;
+		
+		try {
+			baseURL = destination.getURI().toString();
+		} catch (URISyntaxException e) {
+			System.out.println(e.getLocalizedMessage());
+		}
+		   
+		return baseURL;
+	}
+	
 	private boolean inCloud() throws NamingException, DestinationException {
 			
 		javax.naming.Context ctx = new InitialContext();
 		HttpDestination destination = (HttpDestination) ctx.lookup("java:comp/env/" +  "RUNTIME_CHECK");
 		
-		//TODO boolean inCloud()
-
-		return false;
+		return getBaseURL(destination).equalsIgnoreCase(CLOUD);
 		
 	}
 		

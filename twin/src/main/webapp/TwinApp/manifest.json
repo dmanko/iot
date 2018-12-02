@@ -54,6 +54,12 @@
                     "clearAggregation": true
 				}
 			}
-		}
+		},
+		"config": {
+			"serviceConfig": {
+				"name": "dataSource",
+				"serviceUrl": ""
+			}		
+		} 
 	}
 }

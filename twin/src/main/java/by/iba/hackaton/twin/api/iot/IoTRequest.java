@@ -85,7 +85,7 @@ public class IoTRequest {
 	public static void main(String[] args) {
 		
 		IoTRequest request = new IoTRequest();
-		System.out.println(request.getJSONForDeviceCreation("IOT-WINDOWLOCK-HALL-1B-1"));
+		System.out.println(request.getJSONForDeviceCreation("IOT-WINDOWLOCK-ROOM-5C-112"));
 		
 		System.out.println(request.getJSONForSensorCreation("IOT-WINDOWLOCK-HALL-1B-1", "15"));
 	}

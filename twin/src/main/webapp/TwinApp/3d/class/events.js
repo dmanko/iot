@@ -81,6 +81,7 @@
 				cont.highLightRoom(cont.selectedRoom);
 				cont.highLightBlock(cont.selectedBlock);
 				cont.highLightDoor(cont.selectedDoor)
+				cont.update2d();
 			} else {
 				cont.resetRooms([cont.selectedRoom]);
 				cont.resetBlocks([cont.selectedBlock]);
@@ -286,11 +287,13 @@
 	}
 
 	Twin3d.prototype.selectFromUI = function(idsAll, clickedID) {
-		ids = [idsAll[0],idsAll[1]];
-		if (ids[0] || ids[1]) 
-		{
+		this.selectedBlock = 0;
+		this.selectedRoom = 0;
 
-		} else 	if (clickedID&&(!ids.includes(clickedID))) ids.push(clickedID);
+		ids = [idsAll[0], idsAll[1]];
+		if (ids[0] || ids[1]) {
+
+		} else if (clickedID && (!ids.includes(clickedID))) ids.push(clickedID);
 
 
 		if (clickedID.includes('FLOOR')) {
@@ -304,12 +307,7 @@
 		}
 		var selectedMeshes = [];
 		var exceptFloors = [];
-		ids.some(function(id) {
-			if (!id || (id == "undefined") ||
-				!(id.includes('HALL') || id.includes('ROOM') || id.includes('BRD'))) {
 
-			}
-		});
 
 		var ids = ids.filter(function(id, index, arr) {
 
@@ -333,9 +331,9 @@
 			let highLightNumber = 0;
 			if (clickedID == id) highLightNumber = 1;
 			var mesh = cont.getMeshById(id);
-			cont.flyToObject(mesh);
-			if (mesh) {
 
+			if (mesh) {
+				cont.flyToObject(mesh);
 				cont.deselectFloor(exceptFloors);
 				cont.selectFloor(exceptFloors);
 
@@ -344,7 +342,7 @@
 				if (mesh.properties.levelID == 2) {
 					cont.selectBlock(id);
 					cont.highLightBlock(cont.selectedBlock, highLightNumber);
-					cont.selectRoom(cont.selectBlock.parent.properties.ID)
+					cont.selectRoom(cont.selectedBlock.properties.parentID)
 					cont.highLightBlock(cont.selectedRoom, highLightNumber);
 
 					cont.lowLightRooms(selectedMeshes); //disble all except selected
@@ -364,7 +362,7 @@
 
 		});
 		cont.threeLayer.redraw();
-
+		cont.update2d();
 	}
 
 
@@ -382,7 +380,7 @@
 
 
 	Twin3d.prototype.showPath = function(path) {
-		console.log(path);
+		cont.updatePath2d(path);
 		if (!path) return;
 		//reset all
 		cont.scene.remove(cont.pathLine);
@@ -404,7 +402,7 @@
 		});
 		//pathLine 		
 		var points = [];
-
+		var first = true;
 		path.some(function(toSplit) {
 			// split "1: id-1, id-2" into array			
 			splittedArray = toSplit.split(/[:( ,)]+/);
@@ -413,15 +411,21 @@
 			idTo = splittedArray[2];
 
 			//get path objects
+
 			meshFrom = cont.getMeshById(idFrom);
 			meshTo = cont.getMeshById(idTo);
+
+			if (first) {
+				first = false;
+				cont.highLightPath(meshFrom, 1);
+			}
 			//calculate topFloor to hide not needed			
 			if (topFloor < meshFrom.properties.floor)
 				topFloor = meshFrom.properties.floor
 			if (topFloor < meshTo.properties.floor)
 				topFloor = meshTo.properties.floor
 			// color path object, pass intensivity			
-			cont.highLightPath(meshFrom, number / (path.length + 1)/2);
+			//	cont.highLightPath(meshFrom, number / (path.length + 1) / 2);
 			//add path line point			
 			if (meshFrom != 'MAIN')
 				points.push(cont.getCenterPoint(meshFrom));
@@ -431,16 +435,28 @@
 		if (meshTo != 'MAIN')
 			points.push(cont.getCenterPoint(meshTo));
 		var curve = new THREE.CatmullRomCurve3(points, false, "catmullrom");
-		
-		var pointsAll = curve.getPoints(points.length*3);
-		var geometry = new THREE.Geometry();
-		geometry.vertices = pointsAll;
+		//var curve = new THREE.Curve(points);
 
-		cont.pathLine = new THREE.Line(geometry, material);
+		//var pointsAll = curve.getPoints(points.length * 3);
+		//var geometry = new THREE.Geometry();
+		//geometry.vertices = pointsAll;
+
+		//cont.pathLine = new THREE.Line(geometry, material);
+		//cont.scene.add(cont.pathLine);
+
+
+
+		var geometry = new THREE.TubeBufferGeometry(curve, 20, 4, 8, false);
+		var material = new THREE.MeshBasicMaterial({
+			color: 0x00ff00
+		});
+		cont.pathLine = new THREE.Mesh(geometry, material);
 		cont.scene.add(cont.pathLine);
+
+
 		//color last object
-		let intensivity = (number + 1) / (path.length + 1)/2;
-		cont.highLightPath(cont.getMeshById(idTo), intensivity);
+		//let intensivity = (number + 1) / (path.length + 1) / 2;
+		cont.highLightPath(cont.getMeshById(idTo), 1);
 
 
 		// hide floors from very top
